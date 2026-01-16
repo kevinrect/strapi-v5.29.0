@@ -1,3 +1,4 @@
+import * as z from 'zod';
 import type { Core, Modules } from '@strapi/types';
 import { createDeleteHandler } from './handlers/handleDelete';
 import { createGetHandler } from './handlers/handleGet';
@@ -7,7 +8,10 @@ import { McpCapabilityDefinitionRegistry } from './internal/McpCapabilityDefinit
 import { McpConfiguration } from './internal/McpConfiguration';
 import { createMcpServerWithRegistries } from './internal/McpServerFactory';
 import { McpSessionManager } from './internal/McpSessionManager';
+import { createAppTokenStrategy } from './strategies/app-token';
 import { logToolDefinition } from './tools/log';
+import { getProjectSettingsToolDefinition } from './tools/get-project-settings';
+import { generateContentTypeTools } from './tools/content-type-tools';
 import { createManagedInterval } from './utils/createManagedInterval';
 
 /**
@@ -55,6 +59,9 @@ export const createMcpRoutes = (
  * Creates a MCP service instance for Strapi Core
  */
 export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService => {
+  // Create app-token strategy with injected Strapi instance
+  const appTokenStrategy = createAppTokenStrategy(strapi);
+
   // Initialize configuration
   const config = new McpConfiguration(strapi);
 
@@ -72,7 +79,6 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
     'tool',
     Modules.MCP.McpToolDefinition
   >('tool');
-  toolDefinitions.define(logToolDefinition);
 
   const promptDefinitions = new McpCapabilityDefinitionRegistry<
     'prompt',
@@ -87,6 +93,7 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
   // Prepare handler dependencies
   const handlerDependencies: McpHandlerDependencies = {
     strapi,
+    authenticationStrategy: appTokenStrategy,
     sessionManager,
     config,
     createServerWithRegistries: createMcpServerWithRegistries,
@@ -203,6 +210,19 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
       }
     },
   };
+
+  service.registerTool(logToolDefinition);
+
+  service.registerTool(getProjectSettingsToolDefinition);
+
+  // Generate and register content type tools
+  const contentTypeTools = generateContentTypeTools({ strapi });
+  contentTypeTools.forEach((tool) => {
+    service.registerTool(
+      // @ts-expect-error - tool variance conflict
+      tool
+    );
+  });
 
   return service;
 };
