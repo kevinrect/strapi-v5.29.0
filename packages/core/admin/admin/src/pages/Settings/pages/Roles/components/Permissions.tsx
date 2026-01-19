@@ -11,6 +11,7 @@ import { useIntl } from 'react-intl';
 
 import * as PermissonContracts from '../../../../../../../shared/contracts/permissions';
 import { Permission } from '../../../../../../../shared/contracts/shared';
+import { Permission as AuthPermission } from '../../../../../features/Auth';
 import { isObject } from '../../../../../utils/objects';
 import {
   PermissionsDataManagerContextValue,
@@ -66,10 +67,11 @@ interface PermissionsProps {
   isFormDisabled?: boolean;
   permissions?: Permission[];
   layout: PermissonContracts.GetAll.Response['data'];
+  userPermissions?: AuthPermission[];
 }
 
 const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
-  ({ layout, isFormDisabled, permissions = [] }, api) => {
+  ({ layout, isFormDisabled, permissions = [], userPermissions }, api) => {
     const [{ initialData, layouts, modifiedData }, dispatch] = React.useReducer(
       reducer,
       initialState,
@@ -172,6 +174,7 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
           handleChangeCollectionTypeLeftActionRowCheckbox
         }
         onChangeCollectionTypeGlobalActionCheckbox={handleChangeCollectionTypeGlobalActionCheckbox}
+        userPermissions={userPermissions}
       >
         <Tabs.Root defaultValue={TAB_LABELS[0].id}>
           <Tabs.List

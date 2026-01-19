@@ -9,6 +9,7 @@ import * as yup from 'yup';
 
 import { Layouts } from '../../../../../components/Layouts/Layout';
 import { Page } from '../../../../../components/PageHelpers';
+import { useAuth } from '../../../../../features/Auth';
 import { BackButton } from '../../../../../features/BackButton';
 import { useNotification } from '../../../../../features/Notifications';
 import { useTracking } from '../../../../../features/Tracking';
@@ -68,6 +69,7 @@ export const EditView = () => {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
+  const userPermissions = useAuth('EditView', (state) => state.permissions);
 
   const match = useMatch('/me/app-tokens/:id');
   const id = match?.params?.id;
@@ -363,6 +365,7 @@ export const EditView = () => {
                       permissions={permissions || []}
                       ref={permissionsRef}
                       layout={permissionsLayout}
+                      userPermissions={userPermissions}
                     />
                   </Box>
                 )}

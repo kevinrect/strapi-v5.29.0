@@ -144,7 +144,7 @@ const SubCategory = ({
   subCategoryName,
   pathToData,
 }: SubCategoryProps) => {
-  const { modifiedData, onChangeParentCheckbox, onChangeSimpleCheckbox } =
+  const { modifiedData, onChangeParentCheckbox, onChangeSimpleCheckbox, checkUserHasPermission } =
     usePermissionsDataManager();
   const [isConditionModalOpen, setIsConditionModalOpen] = React.useState(false);
   const { formatMessage } = useIntl();
@@ -227,12 +227,18 @@ const SubCategory = ({
         <Flex paddingTop={6} paddingBottom={6}>
           <Grid.Root gap={2} style={{ flex: 1 }}>
             {formattedActions.map(({ checkboxName, value, action, displayName, hasConditions }) => {
+              // For plugins and settings, subject is usually null
+              const userHasPermission = checkUserHasPermission(action, null);
+
               return (
                 <Grid.Item col={4} m={6} xs={12} key={action} direction="column" alignItems="start">
-                  <CheckboxWrapper $disabled={isFormDisabled} $hasConditions={hasConditions}>
+                  <CheckboxWrapper
+                    $disabled={isFormDisabled || !userHasPermission}
+                    $hasConditions={hasConditions}
+                  >
                     <Checkbox
                       name={checkboxName}
-                      disabled={isFormDisabled}
+                      disabled={isFormDisabled || !userHasPermission}
                       // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
                       onCheckedChange={(value) => {
                         onChangeSimpleCheckbox({

@@ -34,7 +34,7 @@ import { RowLabelWithCheckbox, RowLabelWithCheckboxProps } from './RowLabelWithC
 interface CollapsePropertyMatrixProps
   extends Pick<
     ActionRowProps,
-    'childrenForm' | 'isFormDisabled' | 'label' | 'pathToData' | 'propertyName'
+    'childrenForm' | 'isFormDisabled' | 'label' | 'pathToData' | 'propertyName' | 'subject'
   > {
   availableActions?: Array<Action & { isDisplayed: boolean }>;
 }
@@ -52,6 +52,7 @@ const CollapsePropertyMatrix = ({
   label,
   pathToData,
   propertyName,
+  subject,
 }: CollapsePropertyMatrixProps) => {
   const propertyActions = React.useMemo(
     () =>
@@ -82,6 +83,7 @@ const CollapsePropertyMatrix = ({
             pathToData={pathToData}
             propertyName={propertyName}
             isOdd={i % 2 === 0}
+            subject={subject}
           />
         ))}
       </Box>
@@ -96,7 +98,7 @@ const CollapsePropertyMatrix = ({
 interface ActionRowProps
   extends Pick<
     SubActionRowProps,
-    'childrenForm' | 'isFormDisabled' | 'propertyActions' | 'propertyName'
+    'childrenForm' | 'isFormDisabled' | 'propertyActions' | 'propertyName' | 'subject'
   > {
   label: string;
   name: string;
@@ -115,6 +117,7 @@ const ActionRow = ({
   propertyActions,
   propertyName,
   isOdd = false,
+  subject,
 }: ActionRowProps) => {
   const { formatMessage } = useIntl();
   const [rowToOpen, setRowToOpen] = React.useState<string | null>(null);
@@ -123,6 +126,7 @@ const ActionRow = ({
     onChangeCollectionTypeLeftActionRowCheckbox,
     onChangeParentCheckbox,
     onChangeSimpleCheckbox,
+    checkUserHasPermission,
   } = usePermissionsDataManager();
 
   const isActive = rowToOpen === name;
@@ -197,6 +201,7 @@ const ActionRow = ({
 
               if (!isCollapsable) {
                 const checkboxValue = get(modifiedData, checkboxName, false);
+                const userHasPermission = checkUserHasPermission(actionId, subject);
 
                 return (
                   <Flex
@@ -207,7 +212,7 @@ const ActionRow = ({
                     alignItems="center"
                   >
                     <Checkbox
-                      disabled={isFormDisabled}
+                      disabled={isFormDisabled || !userHasPermission}
                       name={checkboxName.join('..')}
                       aria-label={formatMessage(
                         {
@@ -233,6 +238,7 @@ const ActionRow = ({
               const data = get(modifiedData, checkboxName, {});
 
               const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(data);
+              const userHasPermission = checkUserHasPermission(actionId, subject);
 
               return (
                 <Flex
@@ -243,7 +249,7 @@ const ActionRow = ({
                   alignItems="center"
                 >
                   <Checkbox
-                    disabled={isFormDisabled}
+                    disabled={isFormDisabled || !userHasPermission}
                     name={checkboxName.join('..')}
                     onCheckedChange={(value) => {
                       onChangeParentCheckbox({
@@ -277,6 +283,7 @@ const ActionRow = ({
           propertyName={propertyName}
           propertyActions={propertyActions}
           recursiveLevel={0}
+          subject={subject}
         />
       )}
     </>
@@ -361,6 +368,7 @@ interface SubActionRowProps {
   pathToDataFromActionRow: string;
   propertyActions: PropertyAction[];
   propertyName: string;
+  subject?: string;
   recursiveLevel: number;
 }
 
@@ -372,9 +380,10 @@ const SubActionRow = ({
   propertyActions,
   parentName,
   propertyName,
+  subject,
 }: SubActionRowProps) => {
   const { formatMessage } = useIntl();
-  const { modifiedData, onChangeParentCheckbox, onChangeSimpleCheckbox } =
+  const { modifiedData, onChangeParentCheckbox, onChangeSimpleCheckbox, checkUserHasPermission } =
     usePermissionsDataManager();
   const [rowToOpen, setRowToOpen] = React.useState<string | null>(null);
 
@@ -466,6 +475,8 @@ const SubActionRow = ({
                       const checkboxValue = get(modifiedData, checkboxName, false);
 
                       if (!subChildrenForm) {
+                        const userHasPermission = checkUserHasPermission(actionId, subject);
+
                         return (
                           <Flex
                             key={propertyLabel}
@@ -475,7 +486,7 @@ const SubActionRow = ({
                             alignItems="center"
                           >
                             <Checkbox
-                              disabled={isFormDisabled}
+                              disabled={isFormDisabled || !userHasPermission}
                               name={checkboxName.join('..')}
                               aria-label={formatMessage(
                                 {
@@ -500,6 +511,7 @@ const SubActionRow = ({
 
                       const { hasAllActionsSelected, hasSomeActionsSelected } =
                         getCheckboxState(checkboxValue);
+                      const userHasPermission = checkUserHasPermission(actionId, subject);
 
                       return (
                         <Flex
@@ -511,7 +523,7 @@ const SubActionRow = ({
                         >
                           <Checkbox
                             key={propertyLabel}
-                            disabled={isFormDisabled}
+                            disabled={isFormDisabled || !userHasPermission}
                             name={checkboxName.join('..')}
                             aria-label={formatMessage(
                               {
@@ -550,6 +562,7 @@ const SubActionRow = ({
                   propertyName={propertyName}
                   recursiveLevel={recursiveLevel + 1}
                   childrenForm={displayedRecursiveChildren.children}
+                  subject={subject}
                 />
               </Box>
             )}
