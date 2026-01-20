@@ -54,6 +54,7 @@ interface RouterOptions {
 
 class Router {
   private _routes: RouteObject[] = [];
+  private _nonAuthenticatedRoutes: RouteObject[] = [];
   private router: IRouter | null = null;
   private _menu: Omit<MenuItem, 'Component'>[] = [];
   private _settings: Record<string, StrapiAppSetting> = {
@@ -73,6 +74,10 @@ class Router {
 
   get routes() {
     return this._routes;
+  }
+
+  get nonAuthenticatedRoutes() {
+    return this._nonAuthenticatedRoutes;
   }
 
   get menu() {
@@ -102,6 +107,7 @@ class Router {
         ),
         element: <App strapi={strapi} store={strapi.store!} />,
         children: [
+          ...this.nonAuthenticatedRoutes,
           ...getImmutableRoutes(),
           {
             path: '/*',
@@ -363,6 +369,24 @@ class Router {
       );
     }
   }
+
+  addNonAuthenticatedRoute(route: RouteObject | RouteObject[] | Reducer<RouteObject>) {
+    if (Array.isArray(route)) {
+      this._nonAuthenticatedRoutes = [...this._nonAuthenticatedRoutes, ...route];
+    } else if (typeof route === 'object' && route !== null) {
+      this._nonAuthenticatedRoutes.push(route);
+    } else if (typeof route === 'function') {
+      this._nonAuthenticatedRoutes = route(this._nonAuthenticatedRoutes);
+    } else {
+      throw new Error(
+        `Expected the \`route\` passed to \`addRoute\` to be an array or a function, but received ${getPrintableType(
+          route
+        )}`
+      );
+    }
+  }
+
+
 }
 
 /* -------------------------------------------------------------------------------------------------
