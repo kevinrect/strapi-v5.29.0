@@ -128,7 +128,10 @@ const ListPageCE = () => {
         )}
       </Page.Title>
       <Layouts.Header
-        primaryAction={canCreate && <CreateAction onClick={handleToggle} />}
+        primaryAction={
+          canCreate &&
+          process.env.STRAPI_ADMIN_USE_SSO != 'true' && <CreateAction onClick={handleToggle} />
+        }
         title={title}
         subtitle={formatMessage({
           id: 'Settings.permissions.users.listview.header.subtitle',
@@ -200,7 +203,7 @@ const ListPageCE = () => {
                             <Pencil />
                           </IconButton>
                         ) : null}
-                        {canDelete ? (
+                        {canDelete && process.env.STRAPI_ADMIN_USE_SSO != 'true' ? (
                           <IconButton
                             onClick={handleDeleteClick(user.id)}
                             label={formatMessage(

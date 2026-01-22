@@ -84,7 +84,15 @@ export const NavUser = ({
         <MenuTrigger endIcon={null} fullWidth justifyContent="flex-start">
           <Flex alignItems="center" gap={3}>
             <MenuIcon justifyContent="center">
-              <Avatar.Item delayMs={0} fallback={initials || getInitials(user)} />
+              <Avatar.Item
+                src={
+                  process.env.STRAPI_ADMIN_USE_SSO == 'true'
+                    ? `${process.env.STRAPI_ADMIN_PHOTO_PROFILE_URL}/${user?.id?.toString()}`
+                    : undefined
+                }
+                delayMs={0}
+                fallback={initials || getInitials(user)}
+              />
             </MenuIcon>
             {showDisplayName ? (
               <Typography variant="omega">{children || userDisplayName}</Typography>

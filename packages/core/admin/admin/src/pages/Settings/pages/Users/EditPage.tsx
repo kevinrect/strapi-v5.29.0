@@ -231,7 +231,10 @@ const EditPage = () => {
                         })}
                       </Typography>
                       <Grid.Root gap={5}>
-                        {LAYOUT.map((row) =>
+                        {(process.env.STRAPI_ADMIN_USE_SSO == 'true'
+                          ? LAYOUT_WITHOUT_PASSWORD
+                          : LAYOUT
+                        ).map((row) =>
                           row.map(({ size, label, ...field }) => {
                             return (
                               <Grid.Item
@@ -242,7 +245,9 @@ const EditPage = () => {
                               >
                                 <InputRenderer
                                   {...field}
-                                  disabled={!canUpdate}
+                                  disabled={
+                                    !canUpdate || process.env.STRAPI_ADMIN_USE_SSO == 'true'
+                                  }
                                   label={formatMessage(label)}
                                   placeholder={
                                     'placeholder' in field
@@ -372,6 +377,78 @@ const LAYOUT = [
       },
       name: 'confirmPassword',
       type: 'password' as const,
+      size: 6,
+    },
+  ],
+  [
+    {
+      label: {
+        id: 'Auth.form.active.label',
+        defaultMessage: 'Active',
+      },
+      name: 'isActive',
+      type: 'boolean' as const,
+      size: 6,
+    },
+  ],
+];
+
+const LAYOUT_WITHOUT_PASSWORD = [
+  [
+    {
+      label: {
+        id: 'Auth.form.firstname.label',
+        defaultMessage: 'First name',
+      },
+      name: 'firstname',
+      placeholder: {
+        id: 'Auth.form.firstname.placeholder',
+        defaultMessage: 'e.g. Kai',
+      },
+      type: 'string' as const,
+      size: 6,
+      required: true,
+    },
+    {
+      label: {
+        id: 'Auth.form.lastname.label',
+        defaultMessage: 'Last name',
+      },
+      name: 'lastname',
+      placeholder: {
+        id: 'Auth.form.lastname.placeholder',
+        defaultMessage: 'e.g. Doe',
+      },
+      type: 'string' as const,
+      size: 6,
+    },
+  ],
+  [
+    {
+      label: {
+        id: 'Auth.form.email.label',
+        defaultMessage: 'Email',
+      },
+      name: 'email',
+      placeholder: {
+        id: 'Auth.form.email.placeholder',
+        defaultMessage: 'e.g. kai.doe@strapi.io',
+      },
+      type: 'email' as const,
+      size: 6,
+      required: true,
+    },
+    {
+      label: {
+        id: 'Auth.form.username.label',
+        defaultMessage: 'Username',
+      },
+      name: 'username',
+      placeholder: {
+        id: 'Auth.form.username.placeholder',
+        defaultMessage: 'e.g. Kai_Doe',
+      },
+      type: 'string' as const,
       size: 6,
     },
   ],

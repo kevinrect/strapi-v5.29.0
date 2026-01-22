@@ -25,7 +25,15 @@ const ProfileWidget = () => {
 
   return (
     <Flex direction="column" gap={3} height="100%" justifyContent="center">
-      <Avatar.Item delayMs={0} fallback={initials} />
+      <Avatar.Item
+        src={
+          process.env.STRAPI_ADMIN_USE_SSO == 'true'
+            ? `${process.env.STRAPI_ADMIN_PHOTO_PROFILE_URL}/${user?.id?.toString()}`
+            : undefined
+        }
+        delayMs={0}
+        fallback={initials}
+      />
       {userDisplayName && (
         <DisplayNameTypography fontWeight="bold" textTransform="none" textAlign="center">
           {userDisplayName}

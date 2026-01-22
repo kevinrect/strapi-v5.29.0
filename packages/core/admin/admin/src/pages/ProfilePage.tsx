@@ -222,7 +222,9 @@ const ProfilePage = () => {
                 <Layouts.Content>
                   <Flex direction="column" alignItems="stretch" gap={6}>
                     <UserInfoSection />
-                    {!hasLockedRole && <PasswordSection />}
+                    {process.env.STRAPI_ADMIN_USE_SSO != 'true' && !hasLockedRole && (
+                      <PasswordSection />
+                    )}
                     <PreferencesSection localeNames={localeNames} />
                   </Flex>
                 </Layouts.Content>
@@ -482,7 +484,7 @@ const UserInfoSection = () => {
           },
         ].map(({ size, ...field }) => (
           <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
-            <InputRenderer {...field} />
+            <InputRenderer {...field} disabled={process.env.STRAPI_ADMIN_USE_SSO == 'true'} />
           </Grid.Item>
         ))}
       </Grid.Root>
